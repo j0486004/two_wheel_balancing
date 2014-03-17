@@ -24,6 +24,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
+#include "bool.h"
+#include "stm32f10x.h"
+#include "stm32f10x_conf.h"
+#include "MPU6050.h"
+#include "usart.h"
+#include <stdio.h>
+#include <math.h>
+
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -45,12 +53,63 @@
   * @retval None
   */
 int i=0;
+int16_t buff[6];
+float acc[3],gyro[3],num=3.444;
+float x,y,z,f,kp=1.2,kd=0;
+float err,setpoint=0;
+uint16_t CCR3_Val = 432;
+uint16_t CCR4_Val = 612;
+
+
 void TIM2_IRQHandler()
 {
         if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
                
                 TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
                 i++;
+        }
+}
+void TIM3_IRQHandler()
+{
+
+
+        if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET){
+               
+                    //puts("running now\r\n");
+                    MPU6050_GetRawAccelGyro(buff);
+                    for ( int i = 0; i<3; i++)
+                      acc[i] = (buff[i]/16384.0);
+                    for ( int i = 0; i<3; i++)
+                      gyro[i] = (buff[i+2]/131.0);
+
+                    x = acc[0]/acc[2] ;
+                    y = atanf(x);
+                    z = y*180/3.14 ;
+                    err = setpoint - z;
+                    if ( (gyro[1] < 0) && (gyro[1] > -1.2) )
+                    {
+                        gyro[1] = 0;
+                    }
+
+                    f = kp*err - kd*gyro[1] ;
+
+                    CCR3_Val = CCR3_Val +f;  
+                    CCR4_Val = CCR4_Val -f;
+                    TIM4->CCR3 = CCR3_Val;
+                    TIM4->CCR4 = CCR4_Val;
+                    if ( (CCR3_Val>612) || (CCR4_Val > 792) ){
+
+                      CCR3_Val = 432;
+                      CCR4_Val = 612;
+
+                    } else if ( (CCR3_Val<252) || (CCR4_Val <432) ){
+
+                      CCR3_Val = 432;
+                      CCR4_Val = 612;
+
+                    }
+                TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+                
         }
 }
 void NMI_Handler(void)
