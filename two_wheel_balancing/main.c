@@ -54,8 +54,8 @@ void init_tim2() //timer for time delay
 
 	/* Enable the TIM2 global Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 
 	NVIC_Init(&NVIC_InitStructure);
@@ -94,7 +94,7 @@ void init_tim3() //timer for contral
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = 7200-1;
-	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(100-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10-1);
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -171,7 +171,7 @@ int main(void)
 	init_usart1();
 
 	init_tim2();
-	init_tim3();
+	
 
      init_tim4_pwm();
 
@@ -184,6 +184,9 @@ int main(void)
 	   puts("connection failed\r\n");
 	}
 	printf("test float%f\r\n",num);
+
+
+	init_tim3();
 	while (1) {
 		
 		/*printf("acc_x,%f,acc_y,%f,acc_z,%f,gyro_x,%f,gyro_y,%f,gyro_z,%f\r\n",
