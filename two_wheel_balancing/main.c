@@ -161,7 +161,7 @@ int main(void)
 {
 	int16_t buff[6];
 	float acc[3],gyro[3],num=3.4444;
-	float x,y,z,f,kp = 1.2,kd = 0;
+	float x,y,z,f,kp = 1.2,kd = 30;
 	//float prev_err;
 	float err,setpoint=0;
 	//float integral,ki = 0
@@ -206,8 +206,21 @@ int main(void)
 		}
 		//integral = integral + err;
 
-
 		f = kp*err - kd*gyro[1] ;
+
+		if ( (err>15) || (err<-15) ){
+
+			f = kp*err + kd*gyro[1] ;
+		
+		} 
+
+			
+		
+
+		//f = kp*err - kd*gyro[1] ;
+
+
+		
 
 		//turn right when x is positive
 		//turn left when f is negtive
@@ -216,10 +229,10 @@ int main(void)
 
          //printf("tan,%f\r\n",x);
 		//printf("atan,%f\r\n",y);
-		printf("angle,%f\r\n",z);
+		//printf("angle,%f\r\n",z);
 		//printf("erro,%f\r\n",err);
-		printf("gyro_y,%f\r\n",gyro[1]);
-		printf("F,%f\r\n\n",f);
+		//printf("gyro_y,%f\r\n",gyro[1]);
+		//printf("F,%f\r\n\n",f);
 		//printf("inte,%f\r\n",integral);
 		//printf("pre_erro,%f\r\n\n",prev_err);
 
@@ -229,7 +242,7 @@ int main(void)
 
 		gpio_toggle(GPIOA, GPIO_Pin_0);
 		gpio_toggle(GPIOA, GPIO_Pin_1);
-		time_delay(5); //5
+		time_delay(1); //5
 
 
 
