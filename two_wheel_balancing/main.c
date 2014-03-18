@@ -10,9 +10,9 @@ extern uint16_t CCR3_Val ;
 extern uint16_t CCR4_Val ;
 uint16_t PrescalerValue = 0;
 TIM_OCInitTypeDef  TIM_OCInitStructure;
-extern  int i;
+extern  int i,f;
 extern  float acc[3],gyro[3],num;
-extern	float x,y,z,f,kp,kd;
+extern	float x,y,z,w,kp,kd;
 extern	float err,setpoint;
 extern  int16_t buff[6];
 void time_delay(uint32_t count)
@@ -45,7 +45,7 @@ void gpio_toggle(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 {
 	GPIOx->ODR ^= GPIO_Pin;
 }
-void init_tim2() //timer for time delay
+void init_tim2() //timer for time delay (per second)
 {	
 	RCC_PCLK1Config(RCC_HCLK_Div2);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
@@ -94,7 +94,7 @@ void init_tim3() //timer for contral
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = 7200-1;
-	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(100-1);
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -130,8 +130,8 @@ void init_tim4_pwm() //timer for PWM
  
   	
 	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 7200 - 1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 200 -1;
+	TIM_TimeBaseStructure.TIM_Period = 36000 - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 40 -1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
@@ -203,28 +203,9 @@ int main(void)
 		//turn left when f is negtive
 		//turn left when gyro[1] is positive
 
-
-         //printf("tan,%f\r\n",x);
-		//printf("atan,%f\r\n",y);
-		printf("angle,%f\r\n",z);
-		//printf("erro,%f\r\n",err);
-		printf("gyro_y,%f\r\n",gyro[1]);
-		printf("F,%f\r\n\n",f);
-		//printf("inte,%f\r\n",integral);
-		//printf("pre_erro,%f\r\n\n",prev_err);
-
-
-			
-		
-
 		gpio_toggle(GPIOA, GPIO_Pin_0);
 		gpio_toggle(GPIOA, GPIO_Pin_1);
 		time_delay(100); //5
-
-
-
-
-		
 
 		/*if ( (CCR3_Val>462) || (CCR4_Val > 642) ){
 
@@ -237,9 +218,18 @@ int main(void)
 			CCR4_Val = 612;
 
 		}*/
+		//printf("tan,%f\r\n",x);
+		//printf("atan,%f\r\n",y);
+		printf("Angle,%f\r\n",z);
+		//printf("erro,%f\r\n",err);
+		printf("Angular velocity(rad),%f\r\n",gyro[2]);
+		printf("Angular velocity(degree),%f\r\n",w);
+		printf("F,%d\r\n\n",f);
+		//printf("inte,%f\r\n",integral);
+		//printf("pre_erro,%f\r\n\n",prev_err);
 
-		//printf("c3,%d\r\n",CCR3_Val);
-		//printf("c4,%d\r\n\n",CCR4_Val);	
+		printf("ccr3,%d\r\n",CCR3_Val);
+		printf("ccr4,%d\r\n\n",CCR4_Val);	
 
 		//prev_err = err;
 
