@@ -10,11 +10,14 @@ extern uint16_t CCR3_Val ;
 extern uint16_t CCR4_Val ;
 uint16_t PrescalerValue = 0;
 TIM_OCInitTypeDef  TIM_OCInitStructure;
-extern  int i,f;
-extern  float acc[3],gyro[3],num;
-extern	float x,y,z,w,kp,kd;
-extern	float err,setpoint;
-extern  int16_t buff[6];
+extern int16_t buff[6];
+extern float acc[3],gyro[3],num;
+extern float tan_x;
+extern float angle_x;
+extern float w_z,w_y;
+extern float err,setpoint;
+extern float kp,kd,ka;
+extern int i,f,g;
 void time_delay(uint32_t count)
 {
 	while (i<count)
@@ -76,7 +79,7 @@ void init_tim2() //timer for time delay (per second)
 	TIM_ITConfig( TIM2, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM2, ENABLE);
 }
-void init_tim3() //timer for contral
+void init_tim3() //timer for contral  100HZ
 {	
 	RCC_PCLK1Config(RCC_HCLK_Div2);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -130,8 +133,8 @@ void init_tim4_pwm() //timer for PWM
  
   	
 	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 36000 - 1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 40 -1;
+	TIM_TimeBaseStructure.TIM_Period = 57600 - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 25 -1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
@@ -189,10 +192,9 @@ int main(void)
 	init_tim3();
 	while (1) {
 		
-		/*printf("acc_x,%f,acc_y,%f,acc_z,%f,gyro_x,%f,gyro_y,%f,gyro_z,%f\r\n",
+		printf("acc_x,%f,acc_y,%f,acc_z,%f,gyro_x,%f,gyro_y,%f,gyro_z,%f\r\n",
 			acc[0], acc[1], acc[2],
-			gyro[0], gyro[1], gyro[2]);*/
-
+			gyro[0], gyro[1], gyro[2]);
 		
 
 		//printf("abcc,%f\r\n",acc[0]/acc[2]);
@@ -218,18 +220,18 @@ int main(void)
 			CCR4_Val = 612;
 
 		}*/
-		//printf("tan,%f\r\n",x);
+		//printf("tan_x,%f\r\n",tan_x);	
 		//printf("atan,%f\r\n",y);
-		printf("Angle,%f\r\n",z);
+		//printf("Angle_x,%f\r\n",angle_x);
 		//printf("erro,%f\r\n",err);
-		printf("Angular velocity(rad),%f\r\n",gyro[2]);
-		printf("Angular velocity(degree),%f\r\n",w);
+		//printf("Angular velocity(rad),%f\r\n",gyro[2]);
+		printf("Angular velocity(degree),%f\r\n",w_z);
+		printf("Angular velocity(degree),%f\r\n",w_y);
+		printf("G,%d\r\n\n",g);
 		printf("F,%d\r\n\n",f);
-		//printf("inte,%f\r\n",integral);
-		//printf("pre_erro,%f\r\n\n",prev_err);
 
-		printf("ccr3,%d\r\n",CCR3_Val);
-		printf("ccr4,%d\r\n\n",CCR4_Val);	
+		//printf("ccr3,%d\r\n",CCR3_Val);
+		//printf("ccr4,%d\r\n\n",CCR4_Val);	
 
 		//prev_err = err;
 

@@ -52,13 +52,16 @@
   * @param  None
   * @retval None
   */
-int i=0;
+int i=0,f,g;
 int16_t buff[6];
 float acc[3],gyro[3],num=3.444;
-float x,y,z,f,kp=1.2,kd=0;
+float tan_x;
+float angle_x;
+float w_z,w_y;
 float err,setpoint=0;
-uint16_t CCR3_Val = 432;
-uint16_t CCR4_Val = 612;
+float kp=55,kd=0.2,ka=4;
+uint16_t CCR3_Val = 3580;
+uint16_t CCR4_Val = 4840;
 
 
 void TIM2_IRQHandler()
@@ -82,22 +85,42 @@ void TIM3_IRQHandler()
                     for ( int i = 0; i<3; i++)
                       gyro[i] = (buff[i+2]/131.0);
 
-                    x = acc[0]/acc[2] ;
-                    y = atanf(x);
-                    z = y*180/3.14 ;
-                    err = setpoint - z;
-                    if ( (gyro[1] < 0) && (gyro[1] > -1.2) )
+                    tan_x = acc[0]/acc[2] ;
+                    angle_x = atanf(tan_x)*57.29578;
+
+                    
+                    err = setpoint - angle_x;
+
+                    if ( (gyro[2] < 4.4) && (gyro[2] > 3.7) )
+                    {
+                        gyro[2] = 0;
+                    }
+
+                    if ( (gyro[1] < -0.5) && (gyro[1] > -1.2)  )
                     {
                         gyro[1] = 0;
                     }
 
-                    f = kp*err - kd*gyro[1] ;
 
-                    CCR3_Val = CCR3_Val +f;  
-                    CCR4_Val = CCR4_Val -f;
+                    w_z = gyro[2]*57.29578;
+                    w_y = gyro[1]*57.29578;
+
+
+                    f = kp*err + kd*w_z;
+                    g = ka*w_y; 
+
+
+                    
+                    CCR3_Val = 3580 +f-g;  
+                    CCR4_Val = 4840 -f+g;
+
+
+
+                  
+                    
                     TIM4->CCR3 = CCR3_Val;
                     TIM4->CCR4 = CCR4_Val;
-                    if ( (CCR3_Val>612) || (CCR4_Val > 792) ){
+                    /*if ( (CCR3_Val>612) || (CCR4_Val > 792) ){
 
                       CCR3_Val = 432;
                       CCR4_Val = 612;
@@ -107,7 +130,24 @@ void TIM3_IRQHandler()
                       CCR3_Val = 432;
                       CCR4_Val = 612;
 
+                    }*/
+
+                    if ( (CCR3_Val>57600) || (CCR4_Val >57600) ){
+
+                      CCR3_Val = 3580;
+                      CCR4_Val = 4840;
+
+                    } else if ( (CCR3_Val<0) || (CCR4_Val <0) ){
+
+                      CCR3_Val = 3580;
+                      CCR4_Val = 4840;
+
                     }
+
+
+
+
+
                 TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
                 
         }
