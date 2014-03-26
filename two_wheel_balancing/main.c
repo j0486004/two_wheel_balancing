@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 
+
 extern uint16_t CCR3_Val ;
 extern uint16_t CCR4_Val ;
 uint16_t PrescalerValue = 0;
@@ -15,9 +16,10 @@ extern float acc[3],gyro[3],num;
 extern float tan_x;
 extern float angle_x;
 extern float w_z,w_y;
-extern float err,setpoint;
-extern float kp,kd,ka;
+extern float err,integal,setpoint;
+extern float kp,kd,ka,ki;
 extern int i,f,g;
+
 void time_delay(uint32_t count)
 {
 	while (i<count)
@@ -172,14 +174,12 @@ int main(void)
 	//float integral,ki = 0
 	init_led();
 	init_usart1();
-
 	init_tim2();
+	init_tim4_pwm();
+     MPU6050_I2C_Init();
+	MPU6050_Initialize();
 	
 
-     init_tim4_pwm();
-
-	MPU6050_I2C_Init();
-	MPU6050_Initialize();
 	if( MPU6050_TestConnection() == TRUE)
 	{
 	   puts("connection success\r\n");
@@ -188,13 +188,15 @@ int main(void)
 	}
 	printf("test float%f\r\n",num);
 
-
 	init_tim3();
+
+	
+
 	while (1) {
 		
-		printf("acc_x,%f,acc_y,%f,acc_z,%f,gyro_x,%f,gyro_y,%f,gyro_z,%f\r\n",
+		/*printf("acc_x,%f,acc_y,%f,acc_z,%f,gyro_x,%f,gyro_y,%f,gyro_z,%f\r\n",
 			acc[0], acc[1], acc[2],
-			gyro[0], gyro[1], gyro[2]);
+			gyro[0], gyro[1], gyro[2]);*/
 		
 
 		//printf("abcc,%f\r\n",acc[0]/acc[2]);
@@ -209,29 +211,21 @@ int main(void)
 		gpio_toggle(GPIOA, GPIO_Pin_1);
 		time_delay(100); //5
 
-		/*if ( (CCR3_Val>462) || (CCR4_Val > 642) ){
 
-			CCR3_Val = 432;
-			CCR4_Val = 612;
-
-		} else if ( (CCR3_Val<402) || (CCR4_Val <592) ){
-
-			CCR3_Val = 432;
-			CCR4_Val = 612;
-
-		}*/
 		//printf("tan_x,%f\r\n",tan_x);	
 		//printf("atan,%f\r\n",y);
-		//printf("Angle_x,%f\r\n",angle_x);
+		printf("Angle_x,%f\r\n",angle_x);
+		
 		//printf("erro,%f\r\n",err);
 		//printf("Angular velocity(rad),%f\r\n",gyro[2]);
-		printf("Angular velocity(degree),%f\r\n",w_z);
-		printf("Angular velocity(degree),%f\r\n",w_y);
-		printf("G,%d\r\n\n",g);
-		printf("F,%d\r\n\n",f);
+		//printf("Angular velocity(degree),%f\r\n",w_z);
+		//printf("Angular velocity(degree),%f\r\n",w_y);
+		//printf("G,%d\r\n\n",g);
+		//printf("F,%d\r\n\n",f);
+		printf("inte,%f\r\n\n",ki*integal);
 
-		//printf("ccr3,%d\r\n",CCR3_Val);
-		//printf("ccr4,%d\r\n\n",CCR4_Val);	
+		printf("ccr3,%d\r\n",CCR3_Val);
+		printf("ccr4,%d\r\n\n",CCR4_Val);	
 
 		//prev_err = err;
 
